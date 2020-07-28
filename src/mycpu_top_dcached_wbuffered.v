@@ -1,5 +1,5 @@
 `include "defines.v"
-module mycpu_top(
+module mycpu_top_dcached_wbuffered(
 
          input
          wire aclk,
@@ -17,7 +17,7 @@ module mycpu_top(
          wire[1:0]   awlock,
          wire[3:0]   awcache,
          wire[2:0]   awprot,
-         output wire         awvalid,
+         output wire awvalid,
          input
          wire    awready,
 
@@ -34,7 +34,7 @@ module mycpu_top(
          input
          wire[3:0]   bid,
          wire[1:0]   bresp,
-         input wire        bvalid,
+         input wire  bvalid,
          output
          wire        bready,
 
@@ -43,25 +43,25 @@ module mycpu_top(
          output
          wire[3:0]   arid,
          wire[31:0]  araddr,
-         wire[3:0]  arlen,
+         wire[3:0]   arlen,
          wire[2:0]   arsize,
          wire[1:0]   arburst,
          wire[1:0]   arlock,
          wire[3:0]   arcache,
          wire[2:0]   arprot,
-         output wire        arvalid,
+         output wire arvalid,
          input
          wire        arready,
 
          // read data channel signals
          input
-         wire[3:0]    rid,
-         wire[31:0]   rdata,
-         wire[1:0]    rresp,
-         input wire         rlast,
-         wire         rvalid,
+         wire[3:0]   rid,
+         wire[31:0]  rdata,
+         wire[1:0]   rresp,
+         input wire  rlast,
+         wire        rvalid,
          output
-         wire         rready,
+         wire        rready,
 
 
          // port for debug
@@ -91,7 +91,7 @@ wire[`RegBus] current_inst_address;
 wire flush;
 wire          mem_addr_read_ready;
 wire          if_id_full;
-wire[1:0]          axi_read_state;
+wire[1:0]     axi_read_state;
 
 
 
@@ -217,8 +217,8 @@ axi_crossbar_0 axi_crossbar_0_merge (
                  .m_axi_rresp(rresp),      // input wire [1 : 0] m_axi_rresp
                  .m_axi_rlast(rlast),      // input wire [0 : 0] m_axi_rlast
                  .m_axi_rvalid(rvalid),    // input wire [0 : 0] m_axi_rvalid
-                 .m_axi_rready(rready)    // output wire [0 : 0] m_axi_rready
-               );
+                 .m_axi_rready(rready)     // output wire [0 : 0] m_axi_rready
+);
 
 
 
@@ -226,14 +226,14 @@ axi_crossbar_0 axi_crossbar_0_merge (
 
 
 // memory write
-wire[3:0] mw_awid;
-wire[31:0] mw_awaddr;
-wire[3:0]  mw_awlen;
-wire[2:0]  mw_awsize;
-wire[1:0]  mw_awburst;
-wire[1:0]  mw_awlock;
-wire[3:0]  mw_awcache;
-wire[2:0]  mw_awprot;
+wire[3:0]   mw_awid;
+wire[31:0]  mw_awaddr;
+wire[3:0]   mw_awlen;
+wire[2:0]   mw_awsize;
+wire[1:0]   mw_awburst;
+wire[1:0]   mw_awlock;
+wire[3:0]   mw_awcache;
+wire[2:0]   mw_awprot;
 wire        mw_awvalid;
 wire        mw_awready;
 wire[3:0]   mw_wid;
@@ -248,40 +248,40 @@ wire        mw_bvalid;
 wire        mw_bready;
 
 wire[3:0]   mr_arid;
-wire[31:0]   mr_araddr;
+wire[31:0]  mr_araddr;
 wire[3:0]   mr_arlen;
 wire[2:0]   mr_arsize;
 wire[1:0]   mr_arburst;
 wire[1:0]   mr_arlock;
 wire[3:0]   mr_arcache;
 wire[2:0]   mr_arprot;
-wire  mr_arvalid;
-wire   mr_arready;
-wire  mr_flush;
-wire[3:0]    mr_rid;
-wire[31:0]   mr_rdata;
-wire[1:0]    mr_rresp;
-wire         mr_rlast;
-wire         mr_rvalid;
-wire         mr_rready;
+wire        mr_arvalid;
+wire        mr_arready;
+wire        mr_flush;
+wire[3:0]   mr_rid;
+wire[31:0]  mr_rdata;
+wire[1:0]   mr_rresp;
+wire        mr_rlast;
+wire        mr_rvalid;
+wire        mr_rready;
 
 wire[3:0]   ir_arid;
-wire[31:0]   ir_araddr;
+wire[31:0]  ir_araddr;
 wire[3:0]   ir_arlen;
 wire[2:0]   ir_arsize;
 wire[1:0]   ir_arburst;
 wire[1:0]   ir_arlock;
 wire[3:0]   ir_arcache;
 wire[2:0]   ir_arprot;
-wire  ir_arvalid;
-wire   ir_arready;
-wire  ir_flush;
-wire[3:0]    ir_rid;
-wire[31:0]   ir_rdata;
-wire[1:0]    ir_rresp;
-wire         ir_rlast;
-wire         ir_rvalid;
-wire         ir_rready;
+wire        ir_arvalid;
+wire        ir_arready;
+wire        ir_flush;
+wire[3:0]   ir_rid;
+wire[31:0]  ir_rdata;
+wire[1:0]   ir_rresp;
+wire        ir_rlast;
+wire        ir_rvalid;
+wire        ir_rready;
 
 assign s_axi_awid = {4'b0, mw_awid};
 assign s_axi_awaddr = {32'b0, mw_awaddr};
@@ -331,77 +331,196 @@ wire[`RegBus] data_wdata;
 wire data_addr_ok;
 wire data_data_ok;
 wire[`RegBus] data_rdata;
-wire data_data_ok_read;
-wire data_data_ok_write;
 
-// mem write
-axi_write_adapter axi_write_adapter0(
-                    .clk(aclk), .reset(aresetn),
+wire dch_wbf_wreq;
+wire dch_wbf_wreq_recvd;
+wire dch_wbf_wdone;
 
-                    .awid(mw_awid),
-                    .awaddr(mw_awaddr),
-                    .awlen(mw_awlen),
-                    .awsize(mw_awsize),
-                    .awburst(mw_awburst),
-                    .awlock(mw_awlock),
-                    .awcache(mw_awcache),
-                    .awprot(mw_awprot),
-                    .awvalid(mw_awvalid),
-                    .awready(mw_awready),
-                    .wid(mw_wid),
-                    .wdata(mw_wdata),
-                    .wstrb(mw_wstrb),
-                    .wlast(mw_wlast),
-                    .wvalid(mw_wvalid),
-                    .wready(mw_wready),
-                    .bid(mw_bid),
-                    .bresp(mw_bresp),
-                    .bvalid(mw_bvalid),
-                    .bready(mw_bready),
+wire [31:0] dch_wbf_wdata_paddr;
+wire [31:0] dch_wbf_wdata_bank0;
+wire [31:0] dch_wbf_wdata_bank1;
+wire [31:0] dch_wbf_wdata_bank2;
+wire [31:0] dch_wbf_wdata_bank3;
+wire [31:0] dch_wbf_wdata_bank4;
+wire [31:0] dch_wbf_wdata_bank5;
+wire [31:0] dch_wbf_wdata_bank6;
+wire [31:0] dch_wbf_wdata_bank7;
 
-                    .data(data_wdata),
-                    .we((data_req == 1'b1 && data_wr == 1'b1)?1'b1: 1'b0),
-                    .address(data_addr),
-                    .select(data_select),
-                    .mem_write_done(data_data_ok_write)
-                  );
+wire dch_wbf_empty;
+wire dch_wbf_clear_req;
+wire dch_wbf_clear_done;
 
-wire data_addr_ok_write;
-assign data_addr_ok_write = data_data_ok_write;
+wire dch_wbf_lookup_req;
+wire [31:0] dch_wbf_lookup_paddr;
 
-wire data_addr_ok_read;
+wire dch_wbf_lookup_res_hit;
+wire [31:0] dch_wbf_lookup_res_data_bank0;
+wire [31:0] dch_wbf_lookup_res_data_bank1;
+wire [31:0] dch_wbf_lookup_res_data_bank2;
+wire [31:0] dch_wbf_lookup_res_data_bank3;
+wire [31:0] dch_wbf_lookup_res_data_bank4;
+wire [31:0] dch_wbf_lookup_res_data_bank5;
+wire [31:0] dch_wbf_lookup_res_data_bank6;
+wire [31:0] dch_wbf_lookup_res_data_bank7;
 
-// data read
-new_axi_read_adapter new_axi_read_adapter_mem(
-                       .clk(aclk),
-                       .reset(aresetn),
-                       .flush(flush),
+// data r/w
+dcache_wbuffered_new dcache_0(
+    .clk(aclk),
+    .rstn(aresetn),
 
-                       .arid(mr_arid),
-                       .araddr(mr_araddr),
-                       .arlen(mr_arlen),
-                       .arsize(mr_arsize),
-                       .arburst(mr_arburst),
-                       .arlock(mr_arlock),
-                       .arcache(mr_arcache),
-                       .arprot(mr_arprot),
-                       .arvalid(mr_arvalid),
-                       .arready(mr_arready),
-                       .rid(mr_rid),
-                       .rdata(mr_rdata),
-                       .rresp(mr_rresp),
-                       .rvalid(mr_rvalid),
-                       .rready(mr_rready),
-                       .rlast(mr_rlast),
+    // AXI
+    .arid(mr_arid),
+    .araddr(mr_araddr),
+    .arlen(mr_arlen),
+    .arsize(mr_arsize),
+    .arburst(mr_arburst),
+    .arlock(mr_arlock),
+    .arcache(mr_arcache),
+    .arprot(mr_arprot),
+    .arvalid(mr_arvalid),
+    .arready(mr_arready),
 
-                       .address(data_addr),
-                       .address_valid((data_req == 1'b1 && data_wr == 1'b0 )? 1'b1: 1'b0),
-                       .address_read_ready(data_addr_ok_read),
+    .rid(mr_rid),
+    .rdata(mr_rdata),
+    .rresp(mr_rresp),
+    .rvalid(mr_rvalid),
+    .rready(mr_rready),
+    .rlast(mr_rlast),
 
-                       .data_valid(data_data_ok_read),
-                       .data(data_rdata),
-                       .data_address()
-                     );
+    .awid(mw_awid),
+    .awaddr(mw_awaddr),
+    .awlen(mw_awlen),
+    .awsize(mw_awsize),
+    .awburst(mw_awburst),
+    .awlock(mw_awlock),
+    .awcache(mw_awcache),
+    .awprot(mw_awprot),
+    .awvalid(mw_awvalid),
+    .awready(mw_awready),
+
+    .wid(mw_wid),
+    .wdata(mw_wdata),
+    .wstrb(mw_wstrb),
+    .wlast(mw_wlast),
+    .wvalid(mw_wvalid),
+    .wready(mw_wready),
+
+    .bid(mw_bid),
+    .bresp(mw_bresp),
+    .bvalid(mw_bvalid),
+    .bready(mw_bready),
+
+
+    // wbuffer
+    .wbuffer_wreq(dch_wbf_wreq),
+    .wbuffer_wreq_recvd(dch_wbf_wreq_recvd),
+    .wbuffer_wdone(dch_wbf_wdone),
+
+    .wbuffer_wdata_paddr(dch_wbf_wdata_paddr),
+    .wbuffer_wdata_bank0(dch_wbf_wdata_bank0),
+    .wbuffer_wdata_bank1(dch_wbf_wdata_bank1),
+    .wbuffer_wdata_bank2(dch_wbf_wdata_bank2),
+    .wbuffer_wdata_bank3(dch_wbf_wdata_bank3),
+    .wbuffer_wdata_bank4(dch_wbf_wdata_bank4),
+    .wbuffer_wdata_bank5(dch_wbf_wdata_bank5),
+    .wbuffer_wdata_bank6(dch_wbf_wdata_bank6),
+    .wbuffer_wdata_bank7(dch_wbf_wdata_bank7),
+
+    .wbuffer_empty(dch_wbf_empty),
+    .wbuffer_clear_req(dch_wbf_clear_req),
+    .wbuffer_clear_done(dch_wbf_clear_done),
+
+    .wbuffer_lookup_req(dch_wbf_lookup_req),
+    .wbuffer_lookup_res_hit(dch_wbf_lookup_res_hit),
+    
+    .wbuffer_lookup_paddr(dch_wbf_lookup_paddr),
+    .wbuffer_rdata_bank0(dch_wbf_lookup_res_data_bank0),
+    .wbuffer_rdata_bank1(dch_wbf_lookup_res_data_bank1),
+    .wbuffer_rdata_bank2(dch_wbf_lookup_res_data_bank2),
+    .wbuffer_rdata_bank3(dch_wbf_lookup_res_data_bank3),
+    .wbuffer_rdata_bank4(dch_wbf_lookup_res_data_bank4),
+    .wbuffer_rdata_bank5(dch_wbf_lookup_res_data_bank5),
+    .wbuffer_rdata_bank6(dch_wbf_lookup_res_data_bank6),
+    .wbuffer_rdata_bank7(dch_wbf_lookup_res_data_bank7),
+
+
+    // CPU SRAM like
+    .data_req(data_req),
+    .data_wr(data_wr),
+
+    .data_addr_ok(data_addr_ok),
+    .data_addr(data_addr),
+
+    .data_data_ok(data_data_ok),
+    .data_rdata(data_rdata),
+
+    .data_sel(data_select),
+    .data_wdata(data_wdata)
+
+    // .data_cache(1'b0)
+);
+
+wbuffer wbuffer_0(
+    .clk(aclk),
+    .rstn(aresetn),
+
+    // 与dcache
+    .wreq(dch_wbf_wreq),
+    .wreq_recvd(dch_wbf_wreq_recvd),
+    .wdone(dch_wbf_wdone),
+
+    .wdata_paddr(dch_wbf_wdata_paddr),
+    .wdata_bank0(dch_wbf_wdata_bank0),
+    .wdata_bank1(dch_wbf_wdata_bank1),
+    .wdata_bank2(dch_wbf_wdata_bank2),
+    .wdata_bank3(dch_wbf_wdata_bank3),
+    .wdata_bank4(dch_wbf_wdata_bank4),
+    .wdata_bank5(dch_wbf_wdata_bank5),
+    .wdata_bank6(dch_wbf_wdata_bank6),
+    .wdata_bank7(dch_wbf_wdata_bank7),
+
+    .empty(dch_wbf_empty),
+    .clear(dch_wbf_clear_req),
+    .clear_done(dch_wbf_clear_done),
+
+    .lookup_req(dch_wbf_lookup_req),
+    .lookup_paddr(dch_wbf_lookup_paddr),
+
+    .lookup_res_hit(dch_wbf_lookup_res_hit),
+    .lookup_res_data_bank0(dch_wbf_lookup_res_data_bank0),
+    .lookup_res_data_bank1(dch_wbf_lookup_res_data_bank1),
+    .lookup_res_data_bank2(dch_wbf_lookup_res_data_bank2),
+    .lookup_res_data_bank3(dch_wbf_lookup_res_data_bank3),
+    .lookup_res_data_bank4(dch_wbf_lookup_res_data_bank4),
+    .lookup_res_data_bank5(dch_wbf_lookup_res_data_bank5),
+    .lookup_res_data_bank6(dch_wbf_lookup_res_data_bank6),
+    .lookup_res_data_bank7(dch_wbf_lookup_res_data_bank7),
+
+    // 与axi
+    .awid(mw_awid),
+    .awaddr(mw_awaddr),
+    .awlen(mw_awlen),
+    .awsize(mw_awsize),
+    .awburst(mw_awburst),
+    .awlock(mw_awlock),
+    .awcache(mw_awcache),
+    .awprot(mw_awprot),
+    .awvalid(mw_awvalid),
+    .awready(mw_awready),
+
+    .wid(mw_wid),
+    .wdata(mw_wdata),
+    .wstrb(mw_wstrb),
+    .wlast(mw_wlast),
+    .wvalid(mw_wvalid),
+    .wready(mw_wready),
+
+    .bid(mw_bid),
+    .bresp(mw_bresp),
+    .bvalid(mw_bvalid),
+    .bready(mw_bready)
+);
+
 
 // inst read
 new_axi_read_adapter new_axi_read_adapter_inst(
@@ -462,24 +581,12 @@ openmips openmips0(
            .data_select(data_select),
            .data_addr(data_addr),
            .data_wdata(data_wdata),
-           .data_addr_ok( (data_addr_ok_read || data_addr_ok_write)),
-           .data_data_ok((data_data_ok_read || data_data_ok_write)),
+           .data_addr_ok(data_addr_ok),
+           .data_data_ok(data_data_ok),
            .data_rdata(data_rdata),
-           //  .mem_addr_read_ready(mem_addr_read_ready),
 
-           //  .full(if_id_full),
-           //  .mem_data_ready(mem_data_ready),
-           //  .ram_data_i(ram_data_i),
-           //  .ram_addr_o(ram_addr),
-           //  .ram_data_o(ram_data_o),
-           //  .ram_we_o(ram_we),
-           //  .ram_sel_o(ram_sel),
-           //  .ram_re_o(ram_re),
-           //  .ram_write_ready(ram_write_ready),
-           //  .ram_read_valid(ram_read_ready),
            .int_i(int_i),
            .timer_int_o(),
-           //  .ram_ce_o(),
 
            .debug_wb_pc(debug_wb_pc),
            .debug_wb_rf_wen(debug_wb_rf_wen),

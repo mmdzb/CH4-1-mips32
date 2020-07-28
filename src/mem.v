@@ -2,91 +2,92 @@
 `include "defines.v"
 
 module mem(
+         input wire clk,
          input wire rst,
          // 来自执行阶段的信息
          input
-         wire[`RegAddrBus]       wd_i,
-         input wire              wreg_i,
-         wire[`RegBus]           wdata_i,
+         wire[`RegAddrBus]        wd_i,
+         input wire               wreg_i,
+         wire[`RegBus]            wdata_i,
 
 
-         input wire whilo_i,
-         wire[`RegBus]    hi_i,
-         wire[`RegBus]    lo_i,
+         input wire               whilo_i,
+         wire[`RegBus]            hi_i,
+         wire[`RegBus]            lo_i,
 
          // 来自执行阶段的信息
-         wire[`AluOpBus]  aluop_i,
-         wire[`RegBus]    mem_addr_i,
-         wire[`RegBus]    reg2_i,
+         wire[`AluOpBus]          aluop_i,
+         wire[`RegBus]            mem_addr_i,
+         wire[`RegBus]            reg2_i,
 
          // 来自外部数据存储器 RAM 的信息
          // 读取的 data 是否 valid
-         input wire             mem_data_i_valid,
-         wire[`RegBus]    mem_data_i,
+         input wire               mem_data_i_valid,
+         wire[`RegBus]            mem_data_i,
          // axi bvalid
          // 写入是否 ready
-         input wire             mem_write_ready,
+         input wire               mem_write_ready,
 
          // 新增的输入接口
-         wire             LLbit_i,
-         wire             wb_LLbit_we_i,
-         wire             wb_LLbit_value_i,
+         wire                     LLbit_i,
+         wire                     wb_LLbit_we_i,
+         wire                     wb_LLbit_value_i,
 
          // cp0
-         wire             cp0_reg_we_i,
-         wire[4:0]        cp0_reg_write_addr_i,
-         wire[`RegBus]    cp0_reg_data_i,
+         wire                     cp0_reg_we_i,
+         wire[4:0]                cp0_reg_write_addr_i,
+         wire[`RegBus]            cp0_reg_data_i,
 
          // 异常
          // 来自执行阶段
-         wire[31:0]           excepttype_i,
-         input wire                 is_in_delayslot_i,
-         wire[`RegBus]       current_inst_address_i,
+         wire[31:0]               excepttype_i,
+         input wire               is_in_delayslot_i,
+         wire[`RegBus]            current_inst_address_i,
 
          // 来自 CP0 模块
-         wire[`RegBus]        cp0_status_i,
-         wire[`RegBus]        cp0_cause_i,
-         wire[`RegBus]        cp0_epc_i,
+         wire[`RegBus]            cp0_status_i,
+         wire[`RegBus]            cp0_cause_i,
+         wire[`RegBus]            cp0_epc_i,
 
          // 回写阶段的指令对 CP0 中寄存器的写信息
          // 用来检测数据相关
-         input wire                wb_cp0_reg_we,
-         wire[4:0]           wb_cp0_reg_write_addr,
-         wire[`RegBus]       wb_cp0_reg_data,
+         input wire               wb_cp0_reg_we,
+         wire[4:0]                wb_cp0_reg_write_addr,
+         wire[`RegBus]            wb_cp0_reg_data,
 
          // 访存阶段的结果
          output
-         reg[`RegAddrBus]        wd_o,
-         output reg                     wreg_o,
-         reg[`RegBus]            wdata_o,
+         reg[`RegAddrBus]         wd_o,
+         output reg               wreg_o,
+         reg[`RegBus]             wdata_o,
 
-         reg[`RegBus]         hi_o,
-         reg[`RegBus]         lo_o,
+         reg[`RegBus]             hi_o,
+         reg[`RegBus]             lo_o,
          output reg whilo_o,
          // 送到外部数据存储器 RAM 的信息
-         reg[`RegBus]         mem_addr_o,
-         output wire          mem_read_ready,
-         wire                 mem_we_o,
-         reg[3:0]             mem_sel_o,
-         reg[`RegBus]         mem_data_o,
-         output reg                  mem_ce_o,
-         wire                 mem_re_o,
+         reg[`RegBus]             mem_addr_o,
+         output wire              mem_read_ready,
+         wire                     mem_we_o,
+         reg[3:0]                 mem_sel_o,
+         reg[`RegBus]             mem_data_o,
+         output reg               mem_ce_o,
 
          // 新增的输出接口
-         reg                  LLbit_we_o,
-         reg                  LLbit_value_o,
+         reg                      LLbit_we_o,
+         reg                      LLbit_value_o,
 
          // cp0
-         reg           cp0_reg_we_o,
-         reg[4:0]      cp0_reg_write_addr_o,
-         reg[`RegBus]  cp0_reg_data_o,
+         reg                      cp0_reg_we_o,
+         reg[4:0]                 cp0_reg_write_addr_o,
+         reg[`RegBus]             cp0_reg_data_o,
 
          // 异常
-         reg[31:0]       excepttype_o,
-         wire[`RegBus]   cp0_epc_o,
-         wire[`RegBus]   current_inst_address_o,
-         output wire            is_in_delayslot_o,
-         output wire            stallreq_for_mem
+         reg[31:0]                excepttype_o,
+         wire[`RegBus]            cp0_epc_o,
+         wire[`RegBus]            current_inst_address_o,
+         output wire              is_in_delayslot_o,
+         output wire              stallreq_for_mem,
+         wire[`RegBus]            badvaddr_o
        );
 wire[`RegBus]   zero32;
 reg             mem_we;
@@ -100,8 +101,11 @@ reg[`RegBus]        cp0_cause;
 // CP0 中 EPC 寄存器的最新值
 reg[`RegBus]        cp0_epc;
 
+wire mem_re_o;
+
 // 外部数据存储器 RAM 的读写信号
-assign mem_we_o = mem_we;
+// 不小心 multi-driver 了
+// assign mem_we_o = mem_we;
 assign zero32 = `ZeroWord;
 
 // 表示访存阶段的指令是否是延迟槽指令
@@ -116,8 +120,14 @@ assign stallreq_for_mem = (mem_we_o && !mem_write_ready) || (mem_re_o && !mem_da
 // 转化出读使能
 assign mem_re_o = mem_ce_o && !mem_we_o;
 
+
 // always ready because it's a logistic module and it never stall by other reason.
 assign mem_read_ready = `Ready;
+
+// 传给cp0,只有在有异常的时候才有用
+// 只有LH,LHU,LW,SH,SW产生地址未对齐异常,而对应的badvaddr就是前面传过来的mem_addr_i
+// 如果 pc 有异常，说明是 pc 读取地址错误，需要保存的地址是 pc 中的内容
+assign badvaddr_o = (current_inst_address_i[1:0] == 2'b00)? mem_addr_i:current_inst_address_i;
 
 // 获取 LLbit 寄存器的最新之， 如果回写阶段的指令要写 LLbit，那么回写阶段要写入的
 // 值就是 LLbit 寄存器的最新值，反之， LLbit 模块给出的值 LLbit_i 是最新值
@@ -195,6 +205,7 @@ always @(*)
     else if((wb_cp0_reg_we == `WriteEnable)&&
             (wb_cp0_reg_write_addr == `CP0_REG_CAUSE))
       begin
+        cp0_cause = `ZeroWord;
         // IP[1:0] 字段是可写的
         cp0_cause[9:8] = wb_cp0_reg_data[9:8];
         // WP 字段
@@ -229,39 +240,44 @@ always @(*)
                 // interrupt
                 excepttype_o = 32'h0000_0001;
               end
-            else if (excepttype_i[7] == 1'b1)
+            else if (excepttype_i[`SYSCALL_IDX] == 1'b1)
               begin
                 // syscall
                 excepttype_o = 32'h0000_0008;
               end
-            else if (excepttype_i[9] == 1'b1)
+            else if (excepttype_i[`BREAK_IDX] == 1'b1)
               begin
                 // break
                 excepttype_o = 32'h0000_0009;
-              end  
-            else if (excepttype_i[8] == 1'b1)
+              end
+            else if (excepttype_i[`INSTINVALID_IDX] == 1'b1)
               begin
                 // inst_invalid
                 excepttype_o = 32'h0000_000a;
               end
-            else if (excepttype_i[10] == 1'b1)
+            else if (excepttype_i[`TRAP_IDX] == 1'b1)
               begin
                 // trap
                 excepttype_o = 32'h0000_000d;
               end
-            else if (excepttype_i[11] == 1'b1)
+            else if (excepttype_i[`OVERFLOW_IDX] == 1'b1)
               begin
                 // ov
                 excepttype_o = 32'h0000_000c;
               end
-            else if (excepttype_i[12] == 1'b1)
+            else if(excepttype_i[`ADEL_IDX] == 1'b1)
+              begin
+                excepttype_o = `ADEL_FINAL;
+              end
+            else if(excepttype_i[`ADES_IDX] == 1'b1)
+              begin
+                excepttype_o = `ADES_FINAL;
+              end
+            else if (excepttype_i[`ERET_IDX] == 1'b1)
               begin
                 // eret
                 excepttype_o = 32'h0000_000e;
               end
-
-
-
           end
       end
   end
@@ -294,6 +310,25 @@ always @(*)
         cp0_reg_write_addr_o = 5'b00000;
         cp0_reg_data_o = `ZeroWord;
       end
+    if (excepttype_i[`ADES_IDX]==1'b1 && excepttype_i[`ADEL_IDX]== 1'b1)
+      begin
+        wd_o = wd_i;
+        wreg_o = wreg_i;
+        wdata_o = wdata_i;
+        hi_o = hi_i;
+        lo_o = lo_i;
+        whilo_o = whilo_i;
+        mem_addr_o = `ZeroWord;
+        mem_we = `WriteDisable;
+        mem_data_o = `ZeroWord;
+        mem_sel_o = 4'b1111;
+        mem_ce_o = `ChipDisable;
+        LLbit_we_o = `WriteDisable;
+        LLbit_value_o = 1'b0;
+        cp0_reg_we_o = cp0_reg_we_i;
+        cp0_reg_write_addr_o = cp0_reg_write_addr_i;
+        cp0_reg_data_o = cp0_reg_data_i;
+      end
     else
       begin
         wd_o = wd_i;
@@ -304,6 +339,7 @@ always @(*)
         whilo_o = whilo_i;
         mem_addr_o = `ZeroWord;
         mem_we = `WriteDisable;
+        mem_data_o = `ZeroWord;
         mem_sel_o = 4'b1111;
         mem_ce_o = `ChipDisable;
         LLbit_we_o = `WriteDisable;

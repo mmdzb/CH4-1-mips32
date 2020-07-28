@@ -1,32 +1,46 @@
-// 对上述模块进行实例化、连接
+// 对上述模块进行实例化、连�?
 `include "defines.v"
 module openmips(
          input
          wire  clk,  rst,
 
+         // inst
          input wire[`RegBus]     rom_data_i_le,
          input wire              rom_data_valid,
          output  wire[`RegBus]   rom_addr_o,
          output wire             rom_ce_o,
          wire                    inst_ready,
-         wire                    mem_data_ready,
-         input wire                    pc_ready,
+         input wire              pc_ready,
          input wire[`RegBus]     current_inst_address,
-         input wire[`RegBus]     ram_data_i,
-         input wire              ram_write_ready,
-         input wire              ram_read_valid,
-         output
-         wire[`RegBus]     ram_addr_o,
-         wire[`RegBus]     ram_data_o,
 
-         output wire                ram_we_o,
-         wire[3:0]           ram_sel_o,
-         output wire                ram_ce_o,
-         wire                ram_re_o,
 
-         // 6 个外部硬件中断输入
+         // data
+         output wire data_req,
+         output wire data_wr,
+         output wire[3:0] data_select,
+         output wire[`RegBus] data_addr,
+         output wire[`RegBus] data_wdata,
+         input wire  data_addr_ok,
+         input wire data_data_ok,
+         input wire[`RegBus] data_rdata,
+
+         //  wire                    mem_data_ready,
+         //  input wire                    mem_addr_read_ready,
+         //  input wire[`RegBus]     ram_data_i,
+         //  input wire              ram_write_ready,
+         //  input wire              ram_read_valid,
+         //  output
+         //  wire[`RegBus]     ram_addr_o,
+         //  wire[`RegBus]     ram_data_o,
+         //  output wire                ram_we_o,
+         //  output wire          full,
+         //  wire[3:0]           ram_sel_o,
+         //  output wire                ram_ce_o,
+         //  wire                ram_re_o,
+
+         // 6 个外部硬件中断输�?
          input wire[5:0]          int_i,
-         // 是否有定时中断发生
+         // 是否有定时中断发�?
          output wire          timer_int_o,
 
          // flush
@@ -46,19 +60,19 @@ wire[`RegBus]       rom_data_i = rom_data_i_le;
 // wire[`RegBus]       ram_data_i_be;
 
 
-// 送入 PC 有关跳转的信号
+// 送入 PC 有关跳转的信�?
 wire[`RegBus] pc_branch_target_address_i;
 wire pc_branch_flag_i;
 
-//  连接 IF/ID 模块与译码阶段 ID 模块的变量
+//  连接 IF/ID 模块与译码阶�? ID 模块的变�?
 wire[`InstAddrBus]  pc;
 wire[`InstAddrBus]  id_pc_i;
 wire[`InstBus]      id_inst_i;
 
-// 从 ID/EX 回写到 ID 的变量
+// �? ID/EX 回写�? ID 的变�?
 wire                id_is_in_delayslot_i;
 
-// 连接译码阶段 ID 模块输出与 ID/EX 模块的输入变量
+// 连接译码阶段 ID 模块输出�? ID/EX 模块的输入变�?
 wire[`AluOpBus]     id_aluop_o;
 wire[`AluSelBus]    id_alusel_o;
 wire[`RegBus]       id_reg1_o;
@@ -74,7 +88,7 @@ wire[`RegBus]       id_current_inst_addr_o;
 
 
 
-// 连接 ID/EX 模块输出与执行阶段 EX 模块的输入变量
+// 连接 ID/EX 模块输出与执行阶�? EX 模块的输入变�?
 wire[`AluOpBus]     ex_aluop_i;
 wire[`AluSelBus]    ex_alusel_i;
 wire[`RegBus]       ex_reg1_i;
@@ -122,7 +136,7 @@ wire[31:0]          mem_excepttype_i;
 wire[`RegBus]       mem_current_inst_addr_i;
 wire                mem_is_in_delayslot_i;
 
-// 连接访存阶段 MEM 模块的输出与 MEM/WB 模块的输入变量
+// 连接访存阶段 MEM 模块的输出与 MEM/WB 模块的输入变�?
 wire                mem_wreg_o;
 wire[`RegAddrBus]   mem_wd_o;
 wire[`RegBus]       mem_wdata_o;
@@ -140,6 +154,7 @@ wire[`RegBus]       mem_cp0_reg_data_o;
 // To cp0
 wire                mem_is_in_delayslot_o;
 wire[`RegBus]       mem_current_inst_addr_o;
+wire[`RegBus]       mem_badvaddr_o;
 
 // 连接 MEM/WB 模块的输出与回写阶段的输入的变量
 wire                wb_wreg_i;
@@ -148,16 +163,16 @@ wire[`RegBus]       wb_wdata_i;
 wire                wb_LLbit_we;
 wire                wb_LLbit_value;
 
-// 连接 MEM/WB 与 HILO 模块的变量
+// 连接 MEM/WB �? HILO 模块的变�?
 wire                hilo_we_i;
 wire[`RegBus]       hilo_hi_i;
 wire[`RegBus]       hilo_lo_i;
 
-// HILO 输出 即 EX 输入
+// HILO 输出 �? EX 输入
 wire[`RegBus]       hilo_hi_o;
 wire[`RegBus]       hilo_lo_o;
 
-// 连接译码阶段 ID 模块与通用寄存器 Regfile 模块的变量
+// 连接译码阶段 ID 模块与�?�用寄存�? Regfile 模块的变�?
 wire                reg1_read;
 wire                reg2_read;
 wire[`RegBus]       reg1_data;
@@ -166,7 +181,6 @@ wire[`RegAddrBus]   reg1_addr;
 wire[`RegAddrBus]   reg2_addr;
 
 // 连接 CTRL 和其他模块的通路
-wire                stallreq_from_if;
 wire                stallreq_from_id;
 wire                stallreq_from_ex;
 wire                stallreq_from_mem;
@@ -190,6 +204,14 @@ wire[`RegBus]        ex_div_opdata2_o;
 wire                 ex_div_start_o;
 wire                 ex_signed_div_o;
 
+//MUL module
+wire[`DoubleRegBus] ex_mul_result_i;
+wire ex_mul_ready_i;
+wire[`RegBus] ex_mul_opdata1_o;
+wire[`RegBus] ex_mul_opdata2_o;
+wire ex_mul_start_o;
+wire ex_signed_mul_o;
+
 // LLbit
 wire                 LLbit_LLbit_value;
 
@@ -206,29 +228,22 @@ wire[`RegBus]       cp0_cause_o;
 wire[`RegBus]       cp0_epc_o;
 wire[`RegBus]       cp0_config_o;
 wire[`RegBus]       cp0_prid_o;
+wire[`RegBus]       cp0_badvaddr_o;
 
 
-wire full;
-reg stall_pc;
-always @(*)
-  begin
-    if (rst == `RstEnable)
-      stall_pc = `Stop;
-    else if ((pc_ready == `Ready))
-      stall_pc = `NoStop;
-    else
-      stall_pc = `Stop;
-  end
-
-wire stallreq_from_if_for_ex;
 wire ce;
-// 我好像一直都在弄错 rom_ce_o 的含义
-// 目前这个是 pc_re 的意思，表示 valid
-assign rom_ce_o = ce;
-// pc_reg 实例化
+
+// 我好像一直都在弄�? rom_ce_o 的含�?
+// 目前这个�? pc_re 的意思，表示 valid
+// assign rom_ce_o = next_pc_valid;
+
+// pc_reg 实例�?
 pc_reg  pc_reg0(
           .clk(clk), .rst(rst), .pc(pc), .ce(ce),
-          .stall(stall_pc),
+          .stall(stall[0]),
+          .pc_read_ready(rom_ce_o),
+
+          .addr_ok(pc_ready),
 
           .branch_flag_i(pc_branch_flag_i),
           .branch_target_address_i(pc_branch_target_address_i),
@@ -237,41 +252,44 @@ pc_reg  pc_reg0(
           .new_pc(new_pc)
         );
 
-assign rom_addr_o = pc; // 指令存储器的输入地址就是 pc 的值
+assign rom_addr_o = pc; // 指令存储器的输入地址就是 pc 的�??
 
 assign debug_wb_rf_wen = {4{wb_wreg_i}};
 assign debug_wb_rf_wdata = wb_wdata_i;
 assign debug_wb_rf_wnum = wb_wd_i;
 
 
-// IF/ID 实例化
-if_id if_id0(
-        .clk(clk), .rst(rst), .if_pc(current_inst_address),
-        .if_inst(rom_data_i), .id_pc(id_pc_i),
-        .id_inst(id_inst_i),
-        .stall(stall),
+wire inst_valid;
+assign inst_valid = rom_data_valid;
 
-        .branch_flag(pc_branch_flag_i),
-        .inst_valid(rom_data_valid),
-        .inst_ready(inst_ready),
-        .pc_ready(!stall_pc),
-        .stallreq_for_if(stallreq_from_if),
-        .stallreq_for_ex(stallreq_from_if_for_ex),
-        .flush(flush),
-        .full(full)
-      );
+assign inst_ready = 1'b1;
+
+new_if_id new_if_id0(
+            .clk(clk), .rst(rst), .flush(flush),
+            .valid(rom_data_valid),
+            .if_inst(rom_data_i), .if_pc(current_inst_address),
+            .id_inst(id_inst_i), .id_pc(id_pc_i),
+            .stall(stall),
+
+            .next_pc_valid(rom_ce_o),
+
+            .id_next_in_delay_slot(id_next_inst_in_delayslot_o),
+            .id_in_delay_slot(id_is_in_delayslot_i)
+
+          );
 
 id id0(
      .rst(rst), .pc_i(id_pc_i), .inst_i(id_inst_i),
 
-     // 来自 Regfile 模块的输入
+     // 来自 Regfile 模块的输�?
      .reg1_data_i(reg1_data), .reg2_data_i(reg2_data),
+     .excepttype_i(`ZeroWord),
 
-     // 送到 regfile 模块的信息
+     // 送到 regfile 模块的信�?
      .reg1_read_o(reg1_read), .reg2_read_o(reg2_read),
      .reg1_addr_o(reg1_addr), .reg2_addr_o(reg2_addr),
 
-     // 送到 ID/EX 模块的信息
+     // 送到 ID/EX 模块的信�?
      .aluop_o(id_aluop_o), .alusel_o(id_alusel_o),
      .reg1_o(id_reg1_o), .reg2_o(id_reg2_o),
      .wd_o(id_wd_o), .wreg_o(id_wreg_o),
@@ -297,7 +315,7 @@ id id0(
      .current_inst_address_o(id_current_inst_addr_o)
    );
 
-// 通用寄存器 Regfile 实例化
+// 通用寄存�? Regfile 实例�?
 regfile regfile1(
           .clk (clk), .rst(rst),
           .we(wb_wreg_i), .waddr(wb_wd_i),
@@ -307,17 +325,17 @@ regfile regfile1(
           .rdata2(reg2_data)
         );
 
-// ID/EX 实例化
+// ID/EX 实例�?
 id_ex id_ex0(
         .clk(clk),      .rst(rst),
 
-        // 从译码阶段 ID 模块传递过来的信息
+        // 从译码阶�? ID 模块传�?�过来的信息
         .id_aluop(id_aluop_o), .id_alusel(id_alusel_o),
         .id_reg1(id_reg1_o), .id_reg2(id_reg2_o),
         .id_wd(id_wd_o), .id_wreg(id_wreg_o),
         .id_inst(id_inst_o),
 
-        // 传递到执行阶段 EX 模块的信息
+        // 传�?�到执行阶段 EX 模块的信�?
         .ex_aluop(ex_aluop_i), .ex_alusel(ex_alusel_i),
         .ex_reg1(ex_reg1_i), .ex_reg2(ex_reg2_i),
         .ex_wd(ex_wd_i),    .ex_wreg(ex_wreg_i),
@@ -328,30 +346,26 @@ id_ex id_ex0(
 
         .id_link_address(id_link_addr_o),
         .id_is_in_delayslot(id_is_in_delayslot_o),
-        .next_inst_in_delayslot_i(id_next_inst_in_delayslot_o),
+        // .next_inst_in_delayslot_i(id_next_inst_in_delayslot_o),
         .ex_is_in_delayslot(ex_is_in_delayslot_i),
         .ex_link_address(ex_link_address_i),
-        .is_in_delayslot_o(id_is_in_delayslot_i),
+        // .is_in_delayslot_o(id_is_in_delayslot_i),
 
         .flush(flush),
         .id_excepttype(id_excepttype_o),
         .id_current_inst_address(id_current_inst_addr_o),
         .ex_excepttype(ex_excepttype_i),
-        .ex_current_inst_address(ex_current_inst_addr_i),
-
-        // fix
-        .branch_flag(pc_branch_flag_i),
-        .pc_ready(pc_ready)
+        .ex_current_inst_address(ex_current_inst_addr_i)
       );
 
-// EX 实例化
+// EX 实例�?
 ex ex0(
      .rst(rst),
 
-     // 从 ID/EX 模块传递过来的信息
+     // �? ID/EX 模块传�?�过来的信息
      .aluop_i(ex_aluop_i), .alusel_i(ex_alusel_i),
-     // FIXED: 错写成 .reg2_i(ex_reg1_i)
-     // 通过调试逐步发现的
+     // FIXED: 错写�? .reg2_i(ex_reg1_i)
+     // 通过调试逐步发现�?
      .reg1_i(ex_reg1_i), .reg2_i(ex_reg2_i),
      .wd_i(ex_wd_i), .wreg_i(ex_wreg_i),
 
@@ -360,26 +374,26 @@ ex ex0(
 
      .inst_i(ex_inst_i),
 
-     // 输出到 EX/MEM 模块的信息
+     // 输出�? EX/MEM 模块的信�?
      .wd_o(ex_wd_o), .wreg_o(ex_wreg_o),
      .wdata_o(ex_wdata_o),
 
      .whilo_o(ex_whilo_o),
      .hi_o(ex_hi_o),.lo_o(ex_lo_o),
 
-     .cnt_o(cnt_o),
-     .hilo_temp_o(hilo_temp_o),
+     //  .cnt_o(cnt_o),
+     //  .hilo_temp_o(hilo_temp_o),
 
      .aluop_o(ex_aluop_o),
      .mem_addr_o(ex_mem_addr_o),
      .reg2_o(ex_reg2_o),
 
-     // 从 MEM 过来的数据
+     // �? MEM 过来的数�?
      .mem_whilo_i(mem_whilo_o),
      .mem_hi_i(mem_hi_o),
      .mem_lo_i(mem_lo_o),
 
-     // 从 MEM/WB 过来的数据
+     // �? MEM/WB 过来的数�?
      .wb_whilo_i(hilo_we_i),
      .wb_hi_i(hilo_hi_i),
      .wb_lo_i(hilo_lo_i),
@@ -399,6 +413,15 @@ ex ex0(
      .div_opdata2_o(ex_div_opdata2_o),
      .div_start_o(ex_div_start_o),
      .signed_div_o(ex_signed_div_o),
+     
+     //for mul module
+      .mul_result_i(ex_mul_result_i),
+      .mul_ready_i(ex_mul_ready_i),
+      
+      .mul_opdata1_o(ex_mul_opdata1_o),
+      .mul_opdata2_o(ex_mul_opdata2_o),
+      .mul_start_o(ex_mul_start_o),
+      .signed_mul_o(ex_signed_mul_o),
 
      .is_in_delayslot_i(ex_is_in_delayslot_i),
      .link_address_i(ex_link_address_i),
@@ -426,25 +449,27 @@ ex ex0(
      .is_in_delayslot_o(ex_is_in_delayslot_o)
    );
 
-// EX/MEM 实例化
+
+
+// EX/MEM 实例�?
 ex_mem ex_mem0(
          .clk(clk),  .rst(rst), .flush(flush),
 
-         // 来自执行阶段 EX 模块的信息
+         // 来自执行阶段 EX 模块的信�?
          .ex_wd(ex_wd_o), .ex_wreg(ex_wreg_o),
          .ex_wdata(ex_wdata_o),
 
          .ex_whilo(ex_whilo_o), .ex_hi(ex_hi_o),
          .ex_lo(ex_lo_o),
 
-         .cnt_i(cnt_o),
-         .hilo_i(hilo_temp_o),
+         //  .cnt_i(cnt_o),
+         //  .hilo_i(hilo_temp_o),
 
          .ex_aluop(ex_aluop_o),
          .ex_mem_addr(ex_mem_addr_o),
          .ex_reg2(ex_reg2_o),
 
-         // 送到访存阶段 MEM 模块的信息
+         // 送到访存阶段 MEM 模块的信�?
          .mem_wd(mem_wd_i), .mem_wreg(mem_wreg_i),
          .mem_wdata(mem_wdata_i),
 
@@ -459,8 +484,8 @@ ex_mem ex_mem0(
          .stall(stall),
 
          // TO EX
-         .cnt_o(cnt_i),
-         .hilo_o(hilo_temp_i),
+         //  .cnt_o(cnt_i),
+         //  .hilo_o(hilo_temp_i),
 
          // cp0
          .ex_cp0_reg_we(ex_cp0_reg_we_o),
@@ -480,16 +505,29 @@ ex_mem ex_mem0(
 
        );
 
-// MEM 实例化
+// see `mem_signal_extend.v`
+// 以下信号�? `mem` <--> `mem_signal_extend`
+// 目的是扩�? mem 信号�? SRAM 接口
+wire mem_ce_enable;
+wire mem_write_enable;
+wire[`RegBus] mem_addr_i;
+wire[`RegBus] mem_data_i;
+wire[3:0] mem_sel_i;
+wire mem_write_finish;
+wire mem_read_finish;
+wire[`RegBus] mem_data_o;
+
+
+
+// MEM 实例�?
 mem mem0(
+      .clk(clk),
       .rst(rst),
 
-      // 来自 EX/MEM 模块的信息
+      // 来自 EX/MEM 模块的信�?
       .wd_i(mem_wd_i), .wreg_i(mem_wreg_i),
       .wdata_i(mem_wdata_i),
-      .mem_write_ready(ram_write_ready),
-      .mem_data_i_valid(ram_read_valid),
-      .mem_read_ready(mem_data_ready),
+      .mem_read_ready(),
       .stallreq_for_mem(stallreq_from_mem),
 
       .whilo_i(mem_whilo_i),
@@ -503,7 +541,7 @@ mem mem0(
       .wb_LLbit_we_i(wb_LLbit_we),
       .wb_LLbit_value_i(wb_LLbit_value),
 
-      // 送到 MEM/WB 模块的信息
+      // 送到 MEM/WB 模块的信�?
       .wd_o(mem_wd_o),    .wreg_o(mem_wreg_o),
       .wdata_o(mem_wdata_o),
 
@@ -513,16 +551,17 @@ mem mem0(
       .LLbit_we_o(mem_LLbit_we_o),
       .LLbit_value_o(mem_LLbit_value_o),
 
-      // 来自数据存储器的信息
-      .mem_data_i(ram_data_i),
+      // 来自 mem_signal_extend 的信�?
+      .mem_data_i(mem_data_o),
+      .mem_write_ready(mem_write_finish),
+      .mem_data_i_valid(mem_read_finish),
 
-      // 送到数据存储器的信息
-      .mem_addr_o(ram_addr_o),
-      .mem_we_o(ram_we_o),
-      .mem_sel_o(ram_sel_o),
-      .mem_data_o(ram_data_o),
-      .mem_ce_o(ram_ce_o),
-      .mem_re_o(ram_re_o),
+      // 送到 mem_signal_extend 的信�?
+      .mem_addr_o(mem_addr_i),
+      .mem_we_o(mem_write_enable),
+      .mem_sel_o(mem_sel_i),
+      .mem_data_o(mem_data_i),
+      .mem_ce_o(mem_ce_enable),
 
       // cp0
       .cp0_reg_we_i(mem_cp0_reg_we_i),
@@ -549,14 +588,37 @@ mem mem0(
       .cp0_epc_o(ctrl_cp0_epc),
       .excepttype_o(excepttype),
       .is_in_delayslot_o(mem_is_in_delayslot_o),
-      .current_inst_address_o(mem_current_inst_addr_o)
+      .current_inst_address_o(mem_current_inst_addr_o),
+      .badvaddr_o(mem_badvaddr_o)
     );
 
-// MEM/WB 实例化
+mem_signal_extend mem_signal_extend0 (
+                    .clk(clk), .rst(rst), .flush(flush),
+
+                    .enable(mem_ce_enable),
+                    .we(mem_write_enable),
+                    .mem_addr_i(mem_addr_i),
+                    .mem_data_i(mem_data_i),
+                    .mem_sel_i(mem_sel_i),
+                    .mem_write_finish(mem_write_finish),
+                    .mem_read_finish(mem_read_finish),
+                    .mem_data_o(mem_data_o),
+
+                    .req(data_req),
+                    .wr(data_wr),
+                    .select(data_select),
+                    .addr(data_addr),
+                    .wdata(data_wdata),
+                    .addr_ok(data_addr_ok),
+                    .data_ok(data_data_ok),
+                    .rdata(data_rdata)
+                  );
+
+// MEM/WB 实例�?
 mem_wb mem_wb0(
          .clk(clk), .rst(rst), .flush(flush),
 
-         // 来自访存阶段 MEM 模块的信息
+         // 来自访存阶段 MEM 模块的信�?
          .mem_wd(mem_wd_o), .mem_wreg(mem_wreg_o),
          .mem_wdata(mem_wdata_o),
 
@@ -567,7 +629,7 @@ mem_wb mem_wb0(
          .mem_LLbit_we(mem_LLbit_we_o),
 
 
-         // 送到回写阶段的信息
+         // 送到回写阶段的信�?
          .wb_wd(wb_wd_i), .wb_wreg(wb_wreg_i),
          .wb_wdata(wb_wdata_i),
 
@@ -603,15 +665,17 @@ hilo_reg hilo_reg0(
            .lo_o(hilo_lo_o)
          );
 
-wire stallreq_from_ex_sum = stallreq_from_ex || stallreq_from_if_for_ex;
+wire stallreq_from_ex_sum = stallreq_from_ex;
 
 ctrl ctrl0(
        .rst(rst),
        .stall(stall),
        .stallreq_from_ex(stallreq_from_ex_sum),
        .stallreq_from_id(stallreq_from_id),
-       .stallreq_from_if(stallreq_from_if),
+       //  .stallreq_from_if(stallreq_from_if),
        .stallreq_from_mem(stallreq_from_mem),
+       //  .axi_read_state(axi_read_state),
+       .mem_we(mem_write_enable),
 
        .cp0_epc_i(ctrl_cp0_epc),
        .excepttype_i(excepttype),
@@ -632,6 +696,19 @@ div div0(
       .result_o(ex_div_result_i),
       .ready_o(ex_div_ready_i)
     );
+    
+mul_fin mul0(
+      .clk(clk),
+      .rst(rst),
+
+      .signed_mul_i(ex_signed_mul_o),
+      .opdata1_i(ex_mul_opdata1_o),
+      .opdata2_i(ex_mul_opdata2_o),
+      .start_i(ex_mul_start_o),
+      
+      .result_o(ex_mul_result_i),
+      .ready_o(ex_mul_ready_i)
+);    
 
 LLbit_reg LLbit_reg0(
             .clk(clk),
@@ -651,8 +728,9 @@ cp0_reg cp0_reg0(
           .data_i(cp0_data_i),
           .waddr_i(cp0_waddr_i),
           .we_i(cp0_we_i),
-
           .raddr_i(cp0_raddr_i),
+
+          .badvaddr_i(mem_badvaddr_o),
 
           .data_o(cp0_data_o),
           .count_o(cp0_count_o),
@@ -662,6 +740,7 @@ cp0_reg cp0_reg0(
           .epc_o(cp0_epc_o),
           .config_o(cp0_config_o),
           .prid_o(cp0_prid_o),
+          .badvaddr_o(cp0_badvaddr_o),
 
           .excepttype_i(excepttype),
           .current_inst_addr_i(mem_current_inst_addr_o),

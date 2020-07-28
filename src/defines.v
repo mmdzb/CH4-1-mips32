@@ -58,8 +58,8 @@
 `define EXE_MUL         6'b000010
 `define EXE_MULT        6'b011000
 `define EXE_MULTU       6'b011001
-`define EXE_MADD        6'b000000
-`define EXE_MADDU       6'b000001
+// `define EXE_MADD        6'b000000
+// `define EXE_MADDU       6'b000001
 `define EXE_MSUB        6'b000100
 `define EXE_MSUBU       6'b000101
 `define EXE_DIV         6'b011010
@@ -136,10 +136,10 @@
 `define EXE_CLZ_OP      8'b01100000
 `define EXE_CLO_OP      8'b01100001
 `define EXE_MUL_OP      8'b00000010
-`define EXE_MADD_OP        8'b01000000
-`define EXE_MADDU_OP       8'b01000001
-`define EXE_MSUB_OP        8'b01000100
-`define EXE_MSUBU_OP       8'b01000101
+// `define EXE_MADD_OP        8'b01000000
+// `define EXE_MADDU_OP       8'b01000001
+// `define EXE_MSUB_OP        8'b01000100
+// `define EXE_MSUBU_OP       8'b01000101
 `define EXE_DIV_OP         8'b00011010
 `define EXE_DIVU_OP        8'b00011011
 `define EXE_J_OP           8'b01000010
@@ -247,6 +247,7 @@
 `define CP0_REG_EPC         5'b01110
 `define CP0_REG_PRID        5'b01111
 `define CP0_REG_CONFIG      5'b10000
+`define CP0_REG_BADVADDR    5'b01000
 
 `define InterruptAssert     1'b1
 `define InterruptNotAssert     1'b0
@@ -267,3 +268,25 @@
 `define BusyForMEM          2'b10
 `define WriteFree           1'b0
 `define WriteBusy           1'b1
+
+// Exception Related
+// 在mem及之前各类型异常对应的标志位在excepttype中的下标
+`define INTERRUPT_IDX       7:0
+`define SYSCALL_IDX         8
+`define INSTINVALID_IDX     9
+`define BREAK_IDX           10
+`define ERET_IDX            11
+`define TRAP_IDX            12
+`define OVERFLOW_IDX        13
+`define ADEL_IDX            14
+`define ADES_IDX            15
+
+`define INTERRUPT_FINAL     32'h0000_0001
+`define SYSCALL_FINAL       32'h0000_0008
+`define INSTINVALID_FINAL   32'h0000_000a
+`define BREAK_FINAL         32'h0000_0009
+`define ERET_FINAL          32'h0000_000e
+`define TRAP_FINAL          32'h0000_000d
+`define OVERFLOW_FINAL      32'h0000_000c
+`define ADEL_FINAL          32'h0000_000f
+`define ADES_FINAL          32'h0000_0010

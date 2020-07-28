@@ -1,5 +1,5 @@
 `include "defines.v"
-module mycpu_top(
+module mycpu_top_icached(
 
          input
          wire aclk,
@@ -17,16 +17,16 @@ module mycpu_top(
          wire[1:0]   awlock,
          wire[3:0]   awcache,
          wire[2:0]   awprot,
-         output wire         awvalid,
+         wire        awvalid,
          input
-         wire    awready,
+         wire        awready,
 
          // write data channel signals
          output
-         wire[3:0]    wid,
-         wire[31:0]   wdata,
+         wire[3:0]   wid,
+         wire[31:0]  wdata,
          wire[3:0]   wstrb,
-         output wire        wlast,
+         wire        wlast,
          wire        wvalid,
          input       wready,
 
@@ -34,7 +34,7 @@ module mycpu_top(
          input
          wire[3:0]   bid,
          wire[1:0]   bresp,
-         input wire        bvalid,
+         input wire  bvalid,
          output
          wire        bready,
 
@@ -43,13 +43,13 @@ module mycpu_top(
          output
          wire[3:0]   arid,
          wire[31:0]  araddr,
-         wire[3:0]  arlen,
+         wire[3:0]   arlen,
          wire[2:0]   arsize,
          wire[1:0]   arburst,
          wire[1:0]   arlock,
          wire[3:0]   arcache,
          wire[2:0]   arprot,
-         output wire        arvalid,
+         wire        arvalid,
          input
          wire        arready,
 
@@ -58,7 +58,8 @@ module mycpu_top(
          wire[3:0]    rid,
          wire[31:0]   rdata,
          wire[1:0]    rresp,
-         input wire         rlast,
+         input
+         wire         rlast,
          wire         rvalid,
          output
          wire         rready,
@@ -81,58 +82,57 @@ wire[`RegBus] ram_addr;
 wire[`RegBus] ram_data_o;
 wire          ram_we;
 wire          ram_re;
-wire[3:0]          ram_sel;
+wire[3:0]     ram_sel;
 wire          ram_write_ready;
-wire          inst_ready;
+wire          inst_ready;  // useless
 wire          mem_data_ready;
 wire          pc_ready;
 wire          ram_read_ready;
 wire[`RegBus] current_inst_address;
-wire flush;
+wire          flush;
 wire          mem_addr_read_ready;
-wire          if_id_full;
-wire[1:0]          axi_read_state;
+wire[1:0]     axi_read_state;
 
 
 
-wire [7 : 0] s_axi_awid;
-wire [63: 0] s_axi_awaddr;
-wire [7 : 0] s_axi_awlen;
-wire [5 : 0] s_axi_awsize;
-wire [3 : 0] s_axi_awburst;
-wire [3 : 0] s_axi_awlock;
-wire [7 : 0] s_axi_awcache;
-wire [5 : 0] s_axi_awprot;
-wire [7 : 0] s_axi_awqos;
-wire [1 : 0] s_axi_awvalid;
-wire [1 : 0] s_axi_awready;
-wire [7 : 0] s_axi_wid;
-wire [63 : 0] s_axi_wdata;
-wire [7 : 0] s_axi_wstrb;
-wire [1 : 0] s_axi_wlast;
-wire [1 : 0] s_axi_wvalid;
-wire [1 : 0] s_axi_wready;
-wire [7 : 0] s_axi_bid;
-wire [3 : 0] s_axi_bresp;
-wire [1 : 0] s_axi_bvalid;
-wire [1 : 0] s_axi_bready;
-wire [7 : 0] s_axi_arid;
-wire [63 : 0] s_axi_araddr;
-wire [7 : 0] s_axi_arlen;
-wire [5 : 0] s_axi_arsize;
-wire [3 : 0] s_axi_arburst;
-wire [3 : 0] s_axi_arlock;
-wire [7 : 0] s_axi_arcache;
-wire [5 : 0] s_axi_arprot;
-wire [7 : 0] s_axi_arqos;
-wire [1 : 0] s_axi_arvalid;
-wire [1 : 0] s_axi_arready;
-wire [7 : 0] s_axi_rid;
-wire [63 : 0] s_axi_rdata;
-wire [3 : 0] s_axi_rresp;
-wire [1 : 0] s_axi_rlast;
-wire [1 : 0] s_axi_rvalid;
-wire [1 : 0] s_axi_rready;
+wire [7 : 0]    s_axi_awid;
+wire [63: 0]    s_axi_awaddr;
+wire [7 : 0]    s_axi_awlen;
+wire [5 : 0]    s_axi_awsize;
+wire [3 : 0]    s_axi_awburst;
+wire [3 : 0]    s_axi_awlock;
+wire [7 : 0]    s_axi_awcache;
+wire [5 : 0]    s_axi_awprot;
+wire [7 : 0]    s_axi_awqos;
+wire [1 : 0]    s_axi_awvalid;
+wire [1 : 0]    s_axi_awready;
+wire [7 : 0]    s_axi_wid;
+wire [63 : 0]   s_axi_wdata;
+wire [7 : 0]    s_axi_wstrb;
+wire [1 : 0]    s_axi_wlast;
+wire [1 : 0]    s_axi_wvalid;
+wire [1 : 0]    s_axi_wready;
+wire [7 : 0]    s_axi_bid;
+wire [3 : 0]    s_axi_bresp;
+wire [1 : 0]    s_axi_bvalid;
+wire [1 : 0]    s_axi_bready;
+wire [7 : 0]    s_axi_arid;
+wire [63 : 0]   s_axi_araddr;
+wire [7 : 0]    s_axi_arlen;
+wire [5 : 0]    s_axi_arsize;
+wire [3 : 0]    s_axi_arburst;
+wire [3 : 0]    s_axi_arlock;
+wire [7 : 0]    s_axi_arcache;
+wire [5 : 0]    s_axi_arprot;
+wire [7 : 0]    s_axi_arqos;
+wire [1 : 0]    s_axi_arvalid;
+wire [1 : 0]    s_axi_arready;
+wire [7 : 0]    s_axi_rid;
+wire [63 : 0]   s_axi_rdata;
+wire [3 : 0]    s_axi_rresp;
+wire [1 : 0]    s_axi_rlast;
+wire [1 : 0]    s_axi_rvalid;
+wire [1 : 0]    s_axi_rready;
 
 
 wire[3:0] arqos;
@@ -180,6 +180,7 @@ axi_crossbar_0 axi_crossbar_0_merge (
                  .s_axi_rlast(s_axi_rlast),      // output wire [1 : 0] s_axi_rlast
                  .s_axi_rvalid(s_axi_rvalid),    // output wire [1 : 0] s_axi_rvalid
                  .s_axi_rready(s_axi_rready),    // input wire [1 : 0] s_axi_rready
+                 
                  .m_axi_awid(awid),        // output wire [3 : 0] m_axi_awid
                  .m_axi_awaddr(awaddr),    // output wire [31 : 0] m_axi_awaddr
                  .m_axi_awlen(awlen),      // output wire [3 : 0] m_axi_awlen
@@ -217,23 +218,19 @@ axi_crossbar_0 axi_crossbar_0_merge (
                  .m_axi_rresp(rresp),      // input wire [1 : 0] m_axi_rresp
                  .m_axi_rlast(rlast),      // input wire [0 : 0] m_axi_rlast
                  .m_axi_rvalid(rvalid),    // input wire [0 : 0] m_axi_rvalid
-                 .m_axi_rready(rready)    // output wire [0 : 0] m_axi_rready
+                 .m_axi_rready(rready)     // output wire [0 : 0] m_axi_rready
                );
 
 
-
-
-
-
 // memory write
-wire[3:0] mw_awid;
-wire[31:0] mw_awaddr;
-wire[3:0]  mw_awlen;
-wire[2:0]  mw_awsize;
-wire[1:0]  mw_awburst;
-wire[1:0]  mw_awlock;
-wire[3:0]  mw_awcache;
-wire[2:0]  mw_awprot;
+wire[3:0]   mw_awid;
+wire[31:0]  mw_awaddr;
+wire[3:0]   mw_awlen;
+wire[2:0]   mw_awsize;
+wire[1:0]   mw_awburst;
+wire[1:0]   mw_awlock;
+wire[3:0]   mw_awcache;
+wire[2:0]   mw_awprot;
 wire        mw_awvalid;
 wire        mw_awready;
 wire[3:0]   mw_wid;
@@ -248,79 +245,80 @@ wire        mw_bvalid;
 wire        mw_bready;
 
 wire[3:0]   mr_arid;
-wire[31:0]   mr_araddr;
+wire[31:0]  mr_araddr;
 wire[3:0]   mr_arlen;
 wire[2:0]   mr_arsize;
 wire[1:0]   mr_arburst;
 wire[1:0]   mr_arlock;
 wire[3:0]   mr_arcache;
 wire[2:0]   mr_arprot;
-wire  mr_arvalid;
-wire   mr_arready;
-wire  mr_flush;
-wire[3:0]    mr_rid;
-wire[31:0]   mr_rdata;
-wire[1:0]    mr_rresp;
-wire         mr_rlast;
-wire         mr_rvalid;
-wire         mr_rready;
+wire        mr_arvalid;
+wire        mr_arready;
+wire        mr_flush;
+wire[3:0]   mr_rid;
+wire[31:0]  mr_rdata;
+wire[1:0]   mr_rresp;
+wire        mr_rlast;
+wire        mr_rvalid;
+wire        mr_rready;
 
 wire[3:0]   ir_arid;
-wire[31:0]   ir_araddr;
+wire[31:0]  ir_araddr;
 wire[3:0]   ir_arlen;
 wire[2:0]   ir_arsize;
 wire[1:0]   ir_arburst;
 wire[1:0]   ir_arlock;
 wire[3:0]   ir_arcache;
 wire[2:0]   ir_arprot;
-wire  ir_arvalid;
-wire   ir_arready;
-wire  ir_flush;
-wire[3:0]    ir_rid;
-wire[31:0]   ir_rdata;
-wire[1:0]    ir_rresp;
-wire         ir_rlast;
-wire         ir_rvalid;
-wire         ir_rready;
+wire        ir_arvalid;
+wire        ir_arready;
+wire        ir_flush;
+wire[3:0]   ir_rid;
+wire[31:0]  ir_rdata;
+wire[1:0]   ir_rresp;
+wire        ir_rlast;
+wire        ir_rvalid;
+wire        ir_rready;
 
-assign s_axi_awid = {4'b0, mw_awid};
-assign s_axi_awaddr = {32'b0, mw_awaddr};
-assign s_axi_awlen = {4'b0, mw_awlen};
-assign s_axi_awsize = {3'b0, mw_awsize};
-assign s_axi_awburst = { 2'b0, mw_awburst};
-assign s_axi_awlock = { 2'b0, mw_awlock};
-assign s_axi_awcache = { 4'b0,mw_awcache};
-assign s_axi_awprot = { 3'b0,mw_awprot};
-assign s_axi_awqos = { 4'b0, 4'b0};
-assign s_axi_awvalid = { 1'b0, mw_awvalid};
-assign mw_awready = s_axi_awready[0];
-assign s_axi_wid = {4'b0, mw_wid};
-assign s_axi_wdata = { 32'b0, mw_wdata};
-assign s_axi_wstrb = { 4'b0, mw_wstrb};
-assign s_axi_wlast = { 1'b1, mw_wlast};
-assign s_axi_wvalid = { 1'b0, mw_wvalid};
-assign mw_wready = s_axi_wready[0];
-assign mw_bid = s_axi_bid[3:0];
-assign mw_bresp = s_axi_bresp[1:0];
-assign mw_bvalid = s_axi_bvalid[0];
-assign s_axi_bready = { 1'b0, mw_bready};
-assign s_axi_arid = {ir_arid, mr_arid};
-assign s_axi_araddr = { ir_araddr, mr_araddr};
-assign s_axi_arlen = {ir_arlen, mr_arlen};
-assign s_axi_arsize = {ir_arsize, mr_arsize};
-assign s_axi_arburst = {ir_arburst, mr_arburst};
-assign s_axi_arlock = {ir_arlock, mr_arlock};
-assign s_axi_arcache = {ir_arcache, mr_arcache};
-assign s_axi_arprot = {ir_arprot, mr_arprot};
-assign s_axi_arqos = {4'b0, 4'b0};
-assign s_axi_arvalid = {ir_arvalid, mr_arvalid};
-assign {ir_arready, mr_arready} = s_axi_arready;
-assign {ir_rid, mr_rid} = s_axi_rid;
-assign {ir_rdata, mr_rdata}= s_axi_rdata ;
-assign {ir_rresp, mr_rresp}= s_axi_rresp ;
-assign {ir_rlast, mr_rlast} = s_axi_rlast;
-assign {ir_rvalid, mr_rvalid} =s_axi_rvalid ;
-assign s_axi_rready = {ir_rready, mr_rready};
+assign s_axi_awid =     {4'b0, mw_awid};
+assign s_axi_awaddr =   {32'b0, mw_awaddr};
+assign s_axi_awlen =    {4'b0, mw_awlen};
+assign s_axi_awsize =   {3'b010, mw_awsize};
+assign s_axi_awburst =  { 2'b0, mw_awburst};
+assign s_axi_awlock =   { 2'b0, mw_awlock};
+assign s_axi_awcache =  { 4'b0,mw_awcache};
+assign s_axi_awprot =   { 3'b0,mw_awprot};
+assign s_axi_awqos =    { 4'b0, 4'b0};
+assign s_axi_awvalid =  { 1'b0, mw_awvalid};
+assign mw_awready =     s_axi_awready[0];
+assign s_axi_wid =      {4'b0, mw_wid};
+assign s_axi_wdata =    { 32'b0, mw_wdata};
+assign s_axi_wstrb =    { 4'b0, mw_wstrb};
+assign s_axi_wlast =    { 1'b1, mw_wlast};
+assign s_axi_wvalid =   { 1'b0, mw_wvalid};
+assign mw_wready =      s_axi_wready[0];
+assign mw_bid =         s_axi_bid[3:0];
+assign mw_bresp =       s_axi_bresp[1:0];
+assign mw_bvalid =      s_axi_bvalid[0];
+assign s_axi_bready =   { 1'b0, mw_bready};
+assign s_axi_arid =     {ir_arid, mr_arid};
+assign s_axi_araddr =   {ir_araddr, mr_araddr};
+assign s_axi_arlen =    {ir_arlen, mr_arlen};
+assign s_axi_arsize =   {ir_arsize, mr_arsize};
+assign s_axi_arburst =  {ir_arburst, mr_arburst};
+assign s_axi_arlock =   {ir_arlock, mr_arlock};
+assign s_axi_arcache =  {ir_arcache, mr_arcache};
+assign s_axi_arprot =   {ir_arprot, mr_arprot};
+assign s_axi_arqos =    {4'b0, 4'b0};
+assign s_axi_arvalid =  {ir_arvalid, mr_arvalid};
+
+assign {ir_arready, mr_arready} =   s_axi_arready;
+assign {ir_rid, mr_rid} =           s_axi_rid;
+assign {ir_rdata, mr_rdata}=        s_axi_rdata ;
+assign {ir_rresp, mr_rresp}=        s_axi_rresp ;
+assign {ir_rlast, mr_rlast} =       s_axi_rlast;
+assign {ir_rvalid, mr_rvalid} =     s_axi_rvalid ;
+assign s_axi_rready =               {ir_rready, mr_rready};
 
 
 wire data_req;
@@ -331,10 +329,11 @@ wire[`RegBus] data_wdata;
 wire data_addr_ok;
 wire data_data_ok;
 wire[`RegBus] data_rdata;
+
 wire data_data_ok_read;
 wire data_data_ok_write;
 
-// mem write
+// data write
 axi_write_adapter axi_write_adapter0(
                     .clk(aclk), .reset(aresetn),
 
@@ -404,38 +403,37 @@ new_axi_read_adapter new_axi_read_adapter_mem(
                      );
 
 // inst read
-new_axi_read_adapter new_axi_read_adapter_inst(
-                       .clk(aclk),
-                       .reset(aresetn),
-                       .flush(flush),
+inst_cache inst_cache_0(
+    .clk(aclk),
+    .rstn(aresetn),
+    .flush(flush),
 
-                       .arid(ir_arid),
-                       .araddr(ir_araddr),
-                       .arlen(ir_arlen),
-                       .arsize(ir_arsize),
-                       .arburst(ir_arburst),
-                       .arlock(ir_arlock),
-                       .arcache(ir_arcache),
-                       .arprot(ir_arprot),
-                       .arvalid(ir_arvalid),
-                       .arready(ir_arready),
-                       .rid(ir_rid),
-                       .rdata(ir_rdata),
-                       .rresp(ir_rresp),
-                       .rvalid(ir_rvalid),
-                       .rready(ir_rready),
-                       .rlast(ir_rlast),
+    .arid(ir_arid),
+    .araddr(ir_araddr),
+    .arlen(ir_arlen),
+    .arsize(ir_arsize),
+    .arburst(ir_arburst),
+    .arlock(ir_arlock),
+    .arcache(ir_arcache),
+    .arprot(ir_arprot),
+    .arvalid(ir_arvalid),
+    .arready(ir_arready),
+    .rid(ir_rid),
+    .rdata(ir_rdata),
+    .rresp(ir_rresp),
+    .rvalid(ir_rvalid),
+    .rready(ir_rready),
+    .rlast(ir_rlast),
 
-
-                       .address(rom_addr),
-                       .address_valid(rom_re),
-                       .address_read_ready(pc_ready),
-
-                       .data_valid(inst_valid),
-                       .data(rom_data),
-
-                       .data_address(current_inst_address)
-                     );
+    .inst_req(rom_re),                      // cpu::rom_ce_o == read_adapter::address_valid
+    .inst_addr_ready(pc_ready),             // cpu::pc_ready == read_adapter::address_read_ready
+    .inst_addr(rom_addr),
+    .inst_addr_out(current_inst_address),
+    .inst_rdata(rom_data),
+    .inst_data_ok(inst_valid)
+    
+    // .inst_cache(1'b0)
+);
 
 
 // data write
@@ -456,7 +454,6 @@ openmips openmips0(
            .pc_ready(pc_ready),
            .current_inst_address(current_inst_address),
 
-
            .data_req(data_req),
            .data_wr(data_wr),
            .data_select(data_select),
@@ -465,21 +462,9 @@ openmips openmips0(
            .data_addr_ok( (data_addr_ok_read || data_addr_ok_write)),
            .data_data_ok((data_data_ok_read || data_data_ok_write)),
            .data_rdata(data_rdata),
-           //  .mem_addr_read_ready(mem_addr_read_ready),
 
-           //  .full(if_id_full),
-           //  .mem_data_ready(mem_data_ready),
-           //  .ram_data_i(ram_data_i),
-           //  .ram_addr_o(ram_addr),
-           //  .ram_data_o(ram_data_o),
-           //  .ram_we_o(ram_we),
-           //  .ram_sel_o(ram_sel),
-           //  .ram_re_o(ram_re),
-           //  .ram_write_ready(ram_write_ready),
-           //  .ram_read_valid(ram_read_ready),
            .int_i(int_i),
            .timer_int_o(),
-           //  .ram_ce_o(),
 
            .debug_wb_pc(debug_wb_pc),
            .debug_wb_rf_wen(debug_wb_rf_wen),

@@ -15,7 +15,7 @@ module id_ex(
 
          wire[`RegBus]    id_link_address,
          input wire       id_is_in_delayslot,
-         wire             next_inst_in_delayslot_i,
+        //  wire             next_inst_in_delayslot_i,
          // 当前处于译码阶段的指令
          wire[`RegBus]    id_inst,
 
@@ -23,10 +23,6 @@ module id_ex(
          input wire             flush,
          wire[`RegBus]    id_current_inst_address,
          wire[31:0]       id_excepttype,
-
-         // fix
-         input wire branch_flag,
-         input wire pc_ready,
 
          // 传到执行阶段的信息
          output
@@ -39,7 +35,7 @@ module id_ex(
 
          reg[`RegBus]         ex_link_address,
          output reg                  ex_is_in_delayslot,
-         reg                  is_in_delayslot_o,
+        //  reg                  is_in_delayslot_o,
          // 当前处于执行阶段的指令
          reg[`RegBus]         ex_inst,
 
@@ -64,7 +60,7 @@ always @(posedge clk)
         ex_wreg <= `WriteDisable;
         ex_link_address <= `ZeroWord;
         ex_is_in_delayslot <= `NotInDelaySlot;
-        is_in_delayslot_o <= `NotInDelaySlot;
+        // is_in_delayslot_o <= `NotInDelaySlot;
         ex_inst <= `ZeroWord;
         ex_excepttype <= `ZeroWord;
         ex_current_inst_address <= `ZeroWord;
@@ -81,7 +77,7 @@ always @(posedge clk)
         ex_link_address <= `ZeroWord;
         ex_inst <= `ZeroWord;
         ex_is_in_delayslot <= `NotInDelaySlot;
-        is_in_delayslot_o <= `NotInDelaySlot;
+        // is_in_delayslot_o <= `NotInDelaySlot;
         ex_current_inst_address <= `ZeroWord;
       end
     else if(stall[2] == `Stop && stall[3] == `NoStop)
@@ -100,7 +96,7 @@ always @(posedge clk)
         ex_current_inst_address <= `ZeroWord;
         // ??? 为什么少了一项
       end
-    else if(stall[2] == `NoStop || (stall[2] == `Stop && pc_ready == `Ready && branch_flag == 1'b1))
+    else if(stall[2] == `NoStop)
       begin
         ex_aluop <= id_aluop;
         ex_alusel <= id_alusel;
@@ -110,7 +106,7 @@ always @(posedge clk)
         ex_wreg <= id_wreg;
         ex_link_address <= id_link_address;
         ex_is_in_delayslot <= id_is_in_delayslot;
-        is_in_delayslot_o <= next_inst_in_delayslot_i;
+        // is_in_delayslot_o <= next_inst_in_delayslot_i;
         // 在译码阶段没有暂停的情况下，直接将 ID 模块的输入通过接口 ex_inst 输出
         ex_inst <= id_inst;
         ex_excepttype <= id_excepttype;
