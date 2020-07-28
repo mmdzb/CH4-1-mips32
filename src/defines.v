@@ -3,17 +3,17 @@
 `define RstDisable      1'b1
 `define ChipEnable      1'b1    // 芯片使能
 `define ChipDisable     1'b0
-`define WriteEnable     1'b1    // 写使能
+`define WriteEnable     1'b1    // 写使�?
 `define WriteDisable    1'b0
-`define ReadEnable      1'b1    // 读使能
+`define ReadEnable      1'b1    // 读使�?
 `define ReadDisable     1'b0
-`define AluOpBus        7:0     // 译码阶段的输出 aluop_o 的宽度
-`define AluSelBus       2:0     // 译码阶段的输出 alusel_o 的宽度
+`define AluOpBus        7:0     // 译码阶段的输�? aluop_o 的宽�?
+`define AluSelBus       2:0     // 译码阶段的输�? alusel_o 的宽�?
 `define InstValid       1'b0    // 指令有效
 `define InstInvalid     1'b1    // 指令无效
-`define ZeroWord        32'h0   // 32位的数值0
+`define ZeroWord        32'h0   // 32位的数�??0
 
-// 与具体指令有关的宏定义
+// 与具体指令有关的宏定�?
 `define EXE_ORI         6'b001101   // 指令 ori 的指令码
 `define EXE_ANDI        6'b001100
 `define EXE_XORI        6'b001110
@@ -58,8 +58,8 @@
 `define EXE_MUL         6'b000010
 `define EXE_MULT        6'b011000
 `define EXE_MULTU       6'b011001
-// `define EXE_MADD        6'b000000
-// `define EXE_MADDU       6'b000001
+`define EXE_MADD        6'b000000
+`define EXE_MADDU       6'b000001
 `define EXE_MSUB        6'b000100
 `define EXE_MSUBU       6'b000101
 `define EXE_DIV         6'b011010
@@ -108,7 +108,7 @@
 
 `define EXE_ERET        32'b01000010_00000000_00000000_00011000
 
-// AluOp !!! 尽量不要出现重复，比如 ADD & CLZ
+// AluOp !!! 尽量不要出现重复，比�? ADD & CLZ
 `define EXE_OR_OP       8'b00100101
 `define EXE_NOP_OP      8'b0
 `define EXE_AND_OP      8'b00100100
@@ -136,10 +136,10 @@
 `define EXE_CLZ_OP      8'b01100000
 `define EXE_CLO_OP      8'b01100001
 `define EXE_MUL_OP      8'b00000010
-// `define EXE_MADD_OP        8'b01000000
-// `define EXE_MADDU_OP       8'b01000001
-// `define EXE_MSUB_OP        8'b01000100
-// `define EXE_MSUBU_OP       8'b01000101
+`define EXE_MADD_OP        8'b01000000
+`define EXE_MADDU_OP       8'b01000001
+`define EXE_MSUB_OP        8'b01000100
+`define EXE_MSUBU_OP       8'b01000101
 `define EXE_DIV_OP         8'b00011010
 `define EXE_DIVU_OP        8'b00011011
 `define EXE_J_OP           8'b01000010
@@ -199,14 +199,14 @@
 `define EXE_RES_LOAD_STORE  3'b111
 
 // 与指令存储器 ROM 有关的宏定义
-`define InstAddrBus     31:0    // ROM 的地址总线宽度
-`define InstBus         31:0    // ROM 的数据总线宽度
-`define InstAddrIncrement    32'h4    // PC 自动增加时的大小，这里采用字节寻址
+`define InstAddrBus     31:0    // ROM 的地�?总线宽度
+`define InstBus         31:0    // ROM 的数据�?�线宽度
+`define InstAddrIncrement    32'h4    // PC 自动增加时的大小，这里采用字节寻�?
 `define InstMemNum      131071      // ROM 的实际大小为 128KB
-`define InstMemNumLog2  17          // ROM 实际使用的地址线宽度
+`define InstMemNumLog2  17          // ROM 实际使用的地�?线宽�?
 
-// 与通用寄存器 Regfile 有关的宏定义
-`define RegAddrBus      4:0     // Regfile 模块的地址线宽度
+// 与�?�用寄存�? Regfile 有关的宏定义
+`define RegAddrBus      4:0     // Regfile 模块的地�?线宽�?
 `define RegBus          31:0    // Regfile 模块的数据先宽度
 `define DoubleRegBus    63:0    // 2 * RegBus
 `define RegNum          32      // 通用寄存器的数量
@@ -214,8 +214,8 @@
 `define NOPRegAddr      5'b0    //
 
 // For CTRL unit
-`define Stop            1'b1    // 流水线暂停
-`define NoStop          1'b0    // 流水线继续
+`define Stop            1'b1    // 流水线暂�?
+`define NoStop          1'b0    // 流水线继�?
 
 // DIV unit
 `define DivFree         2'b00
@@ -228,17 +228,24 @@
 `define DivStart        1'b1
 `define DivStop         1'b0
 
+`define Mul_1 3'b000
+`define Mul_2 3'b001
+`define Mul_3 3'b010
+`define Mul_4 3'b011
+`define Mul_5 3'b100
+`define Mul_6 3'b101
+
 `define Branch          1'b1
 `define NotBranch       1'b0
 
-`define InDelaySlot     1'b1        // 在延迟槽中
+`define InDelaySlot     1'b1        // 在延迟槽�?
 `define NotInDelaySlot  1'b0
 
 `define DataAddrBus     31:0        // 地址总线宽度
 `define DataBus         31:0        // 数据总线宽度
 `define DataMemNum      500 //131071      // RAM 的大小，单位是字，此处是 128K word
-`define DataMemNumLog2  17          // 实际使用的地址宽度
-`define ByteWidth       7:0         // 一个字节的宽度，是 8bit
+`define DataMemNumLog2  17          // 实际使用的地�?宽度
+`define ByteWidth       7:0         // �?个字节的宽度，是 8bit
 
 `define CP0_REG_COUNT       5'b01001
 `define CP0_REG_COMPARE     5'b01011
